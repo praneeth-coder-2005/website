@@ -1,3 +1,4 @@
+import os
 import logging
 import pyautogui
 
@@ -10,6 +11,11 @@ logging.basicConfig(
         logging.StreamHandler()          # Also print logs to console
     ]
 )
+
+# Ensure DISPLAY is set for Xvfb
+if 'DISPLAY' not in os.environ:
+    logging.warning("DISPLAY environment variable is not set. Setting it to ':1'.")
+    os.environ['DISPLAY'] = ':1'
 
 # Start logging
 logging.debug("Script has started successfully.")
