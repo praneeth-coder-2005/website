@@ -1,74 +1,59 @@
 import pyautogui
 import time
-import logging
+import webbrowser
 import os
 
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("hotstar_login.log"),
-        logging.StreamHandler()
-    ]
-)
-
-# Ensure DISPLAY is set for headless environments
-if 'DISPLAY' not in os.environ:
-    logging.warning("DISPLAY environment variable is not set. Setting it to ':1'.")
-    os.environ['DISPLAY'] = ':1'
-
-
-# Open Hotstar manually or with browser
+# Open Hotstar in a real browser
 def open_hotstar():
-    logging.info("Opening Hotstar login page...")
-    # Replace with your preferred way to open the browser
-    os.system("firefox https://www.hotstar.com/in &")  # Opens in Firefox
-    time.sleep(10)  # Wait for the browser to load
+    print("Opening Hotstar website...")
+    webbrowser.open("https://www.hotstar.com/in")  # Opens Hotstar in the default web browser
+    time.sleep(10)  # Allow time for the page to load
 
-
-# Input the mobile number
+# Enter the mobile number
 def enter_mobile_number():
+    print("Please position your mouse over the mobile number field.")
+    time.sleep(5)  # Give you time to position the mouse
+    x, y = pyautogui.position()  # Record the coordinates of the field
+    print(f"Captured mobile number input field at ({x}, {y})")
+
+    # Get mobile number from user
     mobile_number = input("Enter your mobile number: ")
-    logging.info(f"Entering mobile number: {mobile_number}")
-    pyautogui.click(500, 500)  # Adjust coordinates for the mobile input field
+
+    # Move and click on the input field
+    pyautogui.click(x, y)
     time.sleep(1)
-    pyautogui.typewrite(mobile_number)
+    pyautogui.typewrite(mobile_number)  # Type the mobile number
     pyautogui.press("enter")
-    logging.info("Mobile number entered. Waiting for OTP screen...")
+    print("Mobile number entered.")
 
-
-# Input the OTP
+# Enter the OTP
 def enter_otp():
+    print("Please position your mouse over the OTP field.")
+    time.sleep(5)  # Give you time to position the mouse
+    x, y = pyautogui.position()  # Record the coordinates of the field
+    print(f"Captured OTP input field at ({x}, {y})")
+
+    # Get OTP from user
     otp = input("Enter the OTP received: ")
-    logging.info(f"Entering OTP: {otp}")
-    pyautogui.typewrite(otp)
+
+    # Move and click on the OTP field
+    pyautogui.click(x, y)
+    time.sleep(1)
+    pyautogui.typewrite(otp)  # Type the OTP
     pyautogui.press("enter")
-    logging.info("OTP entered. Waiting for login confirmation...")
-
-    # Check for success or error on screen
-    time.sleep(5)
-    if pyautogui.locateOnScreen("success_indicator.png", confidence=0.8):
-        logging.info("Login successful!")
-    elif pyautogui.locateOnScreen("error_indicator.png", confidence=0.8):
-        logging.error("Login failed. Incorrect OTP or other issue.")
-    else:
-        logging.warning("Could not confirm login status. Check manually.")
-
+    print("OTP entered. Waiting for login confirmation...")
 
 # Main function
 def main():
     try:
-        open_hotstar()
-        time.sleep(2)
-        enter_mobile_number()
-        time.sleep(10)  # Wait for OTP screen
-        enter_otp()
+        open_hotstar()  # Step 1: Open the website
+        enter_mobile_number()  # Step 2: Enter mobile number
+        time.sleep(10)  # Wait for OTP field to appear
+        enter_otp()  # Step 3: Enter OTP
+        print("Login process completed. Verify on the browser if login was successful.")
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
-    finally:
-        logging.debug("Script execution completed.")
+        print(f"An error occurred: {e}")
 
-
+# Run the script
 if __name__ == "__main__":
     main()
