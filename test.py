@@ -1,59 +1,61 @@
-import pyautogui
+from playwright.sync_api import sync_playwright
 import time
-import webbrowser
-import os
 
-# Open Hotstar in a real browser
-def open_hotstar():
-    print("Opening Hotstar website...")
-    webbrowser.open("https://www.hotstar.com/in")  # Opens Hotstar in the default web browser
-    time.sleep(10)  # Allow time for the page to load
+def hotstar_login():
+    with sync_playwright() as p:
+        # Launch browser
+        print("Launching browser...")
+        browser = p.chromium.launch(headless=False)  # Set headless=True to hide the browser
+        context = browser.new_context()
+        page = context.new_page()
 
-# Enter the mobile number
-def enter_mobile_number():
-    print("Please position your mouse over the mobile number field.")
-    time.sleep(5)  # Give you time to position the mouse
-    x, y = pyautogui.position()  # Record the coordinates of the field
-    print(f"Captured mobile number input field at ({x}, {y})")
+        # Navigate to Hotstar login page
+        print("Navigating to Hotstar website...")
+        page.goto("https://www.hotstar.com/in")
+        time.sleep(5)  # Allow time for the page to load
 
-    # Get mobile number from user
-    mobile_number = input("Enter your mobile number: ")
+        # Click on login button
+        print("Clicking login button...")
+        login_button = page.query_selector("text=Login")
+        if login_button:
+            login_button.click()
+            time.sleep(2)
+        else:
+            print("Login button not found!")
+            return
 
-    # Move and click on the input field
-    pyautogui.click(x, y)
-    time.sleep(1)
-    pyautogui.typewrite(mobile_number)  # Type the mobile number
-    pyautogui.press("enter")
-    print("Mobile number entered.")
+        # Enter mobile number
+        mobile_number = input("Enter your mobile number: ")
+        print("Entering mobile number...")
+        mobile_input = page.query_selector("input[type='tel']")
+        if mobile_input:
+            mobile_input.fill(mobile_number)
+            mobile_input.press("Enter")
+            time.sleep(5)
+        else:
+            print("Mobile number input field not found!")
+            return
 
-# Enter the OTP
-def enter_otp():
-    print("Please position your mouse over the OTP field.")
-    time.sleep(5)  # Give you time to position the mouse
-    x, y = pyautogui.position()  # Record the coordinates of the field
-    print(f"Captured OTP input field at ({x}, {y})")
+        # Enter OTP
+        otp = input("Enter the OTP received: ")
+        print("Entering OTP...")
+        otp_input = page.query_selector("input[type='text']")
+        if otp_input:
+            otp_input.fill(otp)
+            otp_input.press("Enter")
+            time.sleep(5)
+        else:
+            print("OTP input field not found!")
+            return
 
-    # Get OTP from user
-    otp = input("Enter the OTP received: ")
+        # Check for login success
+        if "error" in page.content().lower():
+            print("Login failed. Please check the OTP and try again.")
+        else:
+            print("Login successful!")
 
-    # Move and click on the OTP field
-    pyautogui.click(x, y)
-    time.sleep(1)
-    pyautogui.typewrite(otp)  # Type the OTP
-    pyautogui.press("enter")
-    print("OTP entered. Waiting for login confirmation...")
+        # Close the browser
+        browser.close()
 
-# Main function
-def main():
-    try:
-        open_hotstar()  # Step 1: Open the website
-        enter_mobile_number()  # Step 2: Enter mobile number
-        time.sleep(10)  # Wait for OTP field to appear
-        enter_otp()  # Step 3: Enter OTP
-        print("Login process completed. Verify on the browser if login was successful.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-# Run the script
 if __name__ == "__main__":
-    main()
+    hotstar_login()
