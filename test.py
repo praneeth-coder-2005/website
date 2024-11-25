@@ -1,57 +1,42 @@
-import tkinter as tk
-from tkinter import messagebox
-import pyautogui as pag
-import webbrowser
-import time
+import logging
+import pyautogui
 
-# Function to start the login process
-def start_login():
-    phone_number = phone_entry.get()
-    if not phone_number.isdigit() or len(phone_number) != 10:
-        messagebox.showerror("Error", "Enter a valid 10-digit phone number")
-        return
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("test.log"),  # Save logs to a file
+        logging.StreamHandler()          # Also print logs to console
+    ]
+)
 
-    # Open Hotstar login page
-    webbrowser.open("https://www.hotstar.com/in")
-    time.sleep(5)
+# Start logging
+logging.debug("Script has started successfully.")
 
-    # Automate login process
-    pag.click(200, 200)  # Click "Login" button (adjust coordinates)
-    time.sleep(2)
-    pag.typewrite(phone_number)
-    pag.press("enter")
+# Test PyAutoGUI
+try:
+    # Debugging info
+    logging.info("Initializing PyAutoGUI...")
 
-    messagebox.showinfo("Info", "OTP sent. Enter it in the next step.")
+    # Move the mouse as a test
+    pyautogui.FAILSAFE = False  # Disable failsafe
+    logging.info("Moving mouse to (100, 100)...")
+    pyautogui.moveTo(100, 100, duration=1)
 
-# Function to submit OTP
-def submit_otp():
-    otp = otp_entry.get()
-    if not otp.isdigit() or len(otp) != 6:
-        messagebox.showerror("Error", "Enter a valid 6-digit OTP")
-        return
+    # Perform additional PyAutoGUI actions
+    logging.info("Clicking at (100, 100)...")
+    pyautogui.click(100, 100)
 
-    # Automate OTP entry
-    time.sleep(2)
-    pag.typewrite(otp)
-    pag.press("enter")
+    logging.info("Typing text...")
+    pyautogui.typewrite("Hello, PyAutoGUI is working!", interval=0.1)
 
-    messagebox.showinfo("Success", "Logged in successfully!")
+    logging.info("Script completed successfully.")
 
-# GUI
-app = tk.Tk()
-app.title("Custom Hotstar Login Tool")
-app.geometry("300x200")
+except Exception as e:
+    # Log any errors that occur
+    logging.error(f"An error occurred: {e}")
+    print(f"Error: {e}")
 
-tk.Label(app, text="Phone Number:").pack(pady=5)
-phone_entry = tk.Entry(app)
-phone_entry.pack(pady=5)
-
-tk.Button(app, text="Start Login", command=start_login).pack(pady=10)
-
-tk.Label(app, text="Enter OTP:").pack(pady=5)
-otp_entry = tk.Entry(app)
-otp_entry.pack(pady=5)
-
-tk.Button(app, text="Submit OTP", command=submit_otp).pack(pady=10)
-
-app.mainloop()
+# Ensure script completion message
+logging.debug("Script has finished execution.")
