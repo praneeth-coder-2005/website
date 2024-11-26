@@ -6,27 +6,36 @@ PROXY = {
     "https": "http://moviesavingdrive12:ZmuVSycaVu@202.68.184.108:50100",
 }
 
-def resolve_final_url(short_url):
+def resolve_all_redirects(short_url):
     """
-    Recursively resolves a shortened URL to its true final destination using the proxy.
+    Resolves a shortened URL and logs all redirections in the chain.
     """
     try:
+        redirection_chain = []
         while True:
             print(f"Resolving the shortened URL: {short_url}")
-            # Follow all redirects
+            # Follow redirects manually to log each intermediate URL
             response = requests.get(short_url, proxies=PROXY, timeout=10, allow_redirects=False, verify=False)
 
-            # Check if there is a redirection
+            # Log the current URL
+            redirection_chain.append(short_url)
+
+            # Check for redirection
             if response.is_redirect or response.is_permanent_redirect:
-                short_url = response.headers.get("Location")
-                if not short_url.startswith("http"):
+                next_url = response.headers.get("Location")
+                if not next_url.startswith("http"):
                     # Handle relative redirects
                     from urllib.parse import urljoin
-                    short_url = urljoin(response.url, short_url)
-                print(f"Redirected to: {short_url}")
+                    next_url = urljoin(response.url, next_url)
+                print(f"Redirected to: {next_url}")
+                short_url = next_url
             else:
+                # Final URL reached
                 print(f"Final URL reached: {response.url}")
-                return response.url
+                redirection_chain.append(response.url)
+                break
+
+        return redirection_chain
     except requests.exceptions.RequestException as e:
         print(f"Error resolving the URL: {e}")
         return None
@@ -43,9 +52,11 @@ def main():
             break
         
         if short_url:
-            final_url = resolve_final_url(short_url)
-            if final_url:
-                print(f"Final URL: {final_url}")
+            chain = resolve_all_redirects(short_url)
+            if chain:
+                print("\nRedirection Chain:")
+                for idx, url in enumerate(chain, 1):
+                    print(f"{idx}: {url}")
             else:
                 print("Could not resolve the URL. Please try again.")
 
