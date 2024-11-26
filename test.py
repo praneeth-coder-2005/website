@@ -1,64 +1,52 @@
-import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+import time
 
-# Proxy configuration
-PROXY = {
-    "http": "http://moviesavingdrive12:ZmuVSycaVu@202.68.184.108:50100",
-    "https": "http://moviesavingdrive12:ZmuVSycaVu@202.68.184.108:50100",
-}
+def bypass_telegram_link(url):
+    """
+    Uses Selenium to open the provided URL, follow all redirections, and locate the Telegram file button.
+    """
+    # Configure Selenium WebDriver
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Run in headless mode
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
 
-def resolve_all_redirects(short_url):
-    """
-    Resolves a shortened URL and logs all redirections in the chain.
-    """
+    # Replace with the path to your ChromeDriver
+    driver_path = "/path/to/chromedriver"
+    service = Service(driver_path)
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
     try:
-        redirection_chain = []
-        while True:
-            print(f"Resolving the shortened URL: {short_url}")
-            # Follow redirects manually to log each intermediate URL
-            response = requests.get(short_url, proxies=PROXY, timeout=10, allow_redirects=False, verify=False)
+        print(f"Opening URL: {url}")
+        driver.get(url)
+        time.sleep(5)  # Wait for the page to load and redirections to complete
 
-            # Log the current URL
-            redirection_chain.append(short_url)
-
-            # Check for redirection
-            if response.is_redirect or response.is_permanent_redirect:
-                next_url = response.headers.get("Location")
-                if not next_url.startswith("http"):
-                    # Handle relative redirects
-                    from urllib.parse import urljoin
-                    next_url = urljoin(response.url, next_url)
-                print(f"Redirected to: {next_url}")
-                short_url = next_url
-            else:
-                # Final URL reached
-                print(f"Final URL reached: {response.url}")
-                redirection_chain.append(response.url)
-                break
-
-        return redirection_chain
-    except requests.exceptions.RequestException as e:
-        print(f"Error resolving the URL: {e}")
+        # Locate the Telegram file button (adjust the selector as needed)
+        button = driver.find_element(By.XPATH, "//a[contains(@href, 'telegram')]")
+        if button:
+            final_url = button.get_attribute("href")
+            print(f"Bypassed URL: {final_url}")
+            return final_url
+        else:
+            print("Telegram file button not found.")
+            return None
+    except Exception as e:
+        print(f"Error: {e}")
         return None
+    finally:
+        driver.quit()
 
 def main():
-    print("Welcome to the URL Shortener Bypasser")
-    print("Enter the shortened URL below. Type 'exit' to quit.")
-    
-    while True:
-        short_url = input("Shortened URL: ").strip()
-        
-        if short_url.lower() == "exit":
-            print("Exiting the bypasser.")
-            break
-        
-        if short_url:
-            chain = resolve_all_redirects(short_url)
-            if chain:
-                print("\nRedirection Chain:")
-                for idx, url in enumerate(chain, 1):
-                    print(f"{idx}: {url}")
-            else:
-                print("Could not resolve the URL. Please try again.")
+    print("Welcome to the Telegram File Button Bypasser")
+    input_url = input("Enter the URL: ").strip()
+    result = bypass_telegram_link(input_url)
+    if result:
+        print(f"Final URL: {result}")
+    else:
+        print("Could not bypass the link.")
 
 if __name__ == "__main__":
     main()
