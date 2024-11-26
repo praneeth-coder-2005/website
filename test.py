@@ -9,13 +9,26 @@ PROXY = {
 def resolve_final_url(short_url):
     """
     Resolves a shortened URL to its true final destination using the proxy.
+    Tries HTTPS first and falls back to HTTP if SSL issues occur.
     """
     try:
-        print(f"Resolving the shortened URL: {short_url}")
-        # Follow all redirects and extract the final URL, disabling SSL verification
+        print(f"Resolving the shortened URL: {short_url} (HTTPS)")
+        # Attempt HTTPS resolution first
         response = requests.get(short_url, proxies=PROXY, timeout=10, allow_redirects=True, verify=False)
         print(f"Bypassed URL: {response.url}")
         return response.url
+    except requests.exceptions.SSLError as ssl_error:
+        print(f"SSL Error encountered: {ssl_error}. Retrying with HTTP...")
+        if short_url.startswith("https://"):
+            short_url = short_url.replace("https://", "http://")
+        try:
+            print(f"Resolving the shortened URL: {short_url} (HTTP)")
+            response = requests.get(short_url, proxies=PROXY, timeout=10, allow_redirects=True)
+            print(f"Bypassed URL: {response.url}")
+            return response.url
+        except requests.exceptions.RequestException as http_error:
+            print(f"HTTP Error encountered: {http_error}")
+            return None
     except requests.exceptions.RequestException as e:
         print(f"Error resolving the URL: {e}")
         return None
