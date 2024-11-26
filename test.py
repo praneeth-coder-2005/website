@@ -12,8 +12,8 @@ def resolve_final_url(short_url):
     """
     try:
         print(f"Resolving the shortened URL: {short_url}")
-        # Follow all redirects and extract the final URL
-        response = requests.get(short_url, proxies=PROXY, timeout=10, allow_redirects=True)
+        # Follow all redirects and extract the final URL, disabling SSL verification
+        response = requests.get(short_url, proxies=PROXY, timeout=10, allow_redirects=True, verify=False)
         print(f"Bypassed URL: {response.url}")
         return response.url
     except requests.exceptions.RequestException as e:
