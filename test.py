@@ -13,7 +13,8 @@ def bypass_telegram_link(url):
     chrome_options.add_argument("--headless")  # Run in headless mode
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    
+    chrome_options.binary_location = "/usr/bin/google-chrome"  # Explicitly set Chrome binary location
+
     # Automatically find ChromeDriver in PATH
     service = Service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
