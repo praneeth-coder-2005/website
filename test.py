@@ -13,10 +13,9 @@ def bypass_telegram_link(url):
     chrome_options.add_argument("--headless")  # Run in headless mode
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-
-    # Replace with the path to your ChromeDriver
-    driver_path = "/path/to/chromedriver"
-    service = Service(driver_path)
+    
+    # Automatically find ChromeDriver in PATH
+    service = Service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
